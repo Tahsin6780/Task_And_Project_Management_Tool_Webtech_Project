@@ -27,9 +27,13 @@ function initials($name) {
 	When Member 1 login is merged, remove this block.
 */
 if (empty($_SESSION['user_id'])) {
-	$_SESSION['user_id'] = 1;
-	$_SESSION['name'] = 'Pikachu';
-	$_SESSION['workspace_id'] = 1;
+	header('Location: index.php?page=login');
+	exit;
+}
+
+if (empty($_SESSION['workspace_id'])) {
+	header('Location: index.php?page=workspace_setup');
+	exit;
 }
 
 $database = new Database();

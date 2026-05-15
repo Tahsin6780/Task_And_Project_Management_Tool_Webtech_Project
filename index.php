@@ -23,17 +23,17 @@ function initials($name) {
 }
 
 /*
-	Temporary session for testing Member 2 independently.
-	When Member 1 login is merged, remove this block.
+	Temporary testing session.
+	Remove this after Member 1 auth/workspace module is merged.
+	Member 1 should set:
+	$_SESSION['user_id']
+	$_SESSION['name']
+	$_SESSION['workspace_id']
 */
 if (empty($_SESSION['user_id'])) {
-	header('Location: index.php?page=login');
-	exit;
-}
-
-if (empty($_SESSION['workspace_id'])) {
-	header('Location: index.php?page=workspace_setup');
-	exit;
+	$_SESSION['user_id'] = 1;
+	$_SESSION['name'] = 'Pikachu';
+	$_SESSION['workspace_id'] = 1;
 }
 
 $database = new Database();

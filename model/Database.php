@@ -2,7 +2,7 @@
 
 class Database {
 	private $host = 'localhost';
-	private $dbname = 'project08_task_management';
+	private $dbname = 'project_management_db';
 	private $username = 'root';
 	private $password = '';
 	private $pdo;

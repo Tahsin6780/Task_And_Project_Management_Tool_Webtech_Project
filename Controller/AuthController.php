@@ -97,7 +97,7 @@ if (isset($_POST['login'])) {
     exit();
 }
 
-// ── LOGOUT
+//  LOGOUT
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();

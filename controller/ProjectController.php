@@ -226,6 +226,74 @@ class ProjectController {
 		exit;
 	}
 
+    public function unarchiveAjax($id) {
+	header('Content-Type: application/json');
+
+	$workspace_id = $this->workspaceId();
+
+	if (!$id) {
+		echo json_encode([
+			'ok' => false,
+			'message' => 'Project ID is missing.'
+		]);
+		exit;
+	}
+
+	$project = $this->projectModel->findProject($id, $workspace_id);
+
+	if (!$project) {
+		http_response_code(404);
+		echo json_encode([
+			'ok' => false,
+			'message' => 'Project not found.'
+		]);
+		exit;
+	}
+
+	$ok = $this->projectModel->unarchiveProject($id, $workspace_id);
+
+	echo json_encode([
+		'ok' => $ok,
+		'message' => $ok ? 'Project restored to active projects.' : 'Could not unarchive project.',
+		'project_id' => $id
+	]);
+	exit;
+}
+
+public function deleteAjax($id) {
+	header('Content-Type: application/json');
+
+	$workspace_id = $this->workspaceId();
+
+	if (!$id) {
+		echo json_encode([
+			'ok' => false,
+			'message' => 'Project ID is missing.'
+		]);
+		exit;
+	}
+
+	$project = $this->projectModel->findProject($id, $workspace_id);
+
+	if (!$project) {
+		http_response_code(404);
+		echo json_encode([
+			'ok' => false,
+			'message' => 'Project not found.'
+		]);
+		exit;
+	}
+
+	$ok = $this->projectModel->deleteProject($id, $workspace_id);
+
+	echo json_encode([
+		'ok' => $ok,
+		'message' => $ok ? 'Project deleted permanently.' : 'Could not delete project.',
+		'project_id' => $id
+	]);
+	exit;
+}
+
 	public function archived() {
 		$workspace_id = $this->workspaceId();
 		$projects = $this->projectModel->getArchivedProjects($workspace_id);

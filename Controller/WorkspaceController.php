@@ -1,104 +1,105 @@
 <?php
-session_start();
+require_once('../Config/db.php');
 
-// Auth guard — every workspace action requires login
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../View/login.php");
-    exit();
+function createWorkspace($name, $description, $owner_id, $invite_code) {
+    $conn = openConnection();
+
+    $sql = "INSERT INTO workspaces (name, description, owner_id, invite_code) VALUES ('$name', '$description', $owner_id, '$invite_code')";
+    $res = mysqli_query($conn, $sql);
+    $workspace_id = mysqli_insert_id($conn);
+
+    if ($res) {
+        $sql2 = "INSERT INTO workspace_members (workspace_id, user_id) VALUES ($workspace_id, $owner_id)";
+        mysqli_query($conn, $sql2);
+    }
+
+    mysqli_close($conn);
+    return $res ? $workspace_id : false;
 }
 
-require_once('../Model/Workspace.php');
+function joinWorkspace($code, $user_id) {
+    $conn = openConnection();
 
-$user_id = $_SESSION['user_id'];
+    $sql       = "SELECT id FROM workspaces WHERE invite_code='$code'";
+    $result    = mysqli_query($conn, $sql);
+    $workspace = mysqli_fetch_assoc($result);
 
-// CREATE WORKSPACE
-if (isset($_POST['create_workspace'])) {
-    $name        = trim($_POST['name']        ?? '');
-    $description = trim($_POST['description'] ?? '');
-
-    if ($name === '') {
-        $_SESSION['workspaceError'] = "Workspace name is required";
-        header("Location: ../View/onbroading.php");
-        exit();
+    if (!$workspace) {
+        mysqli_close($conn);
+        return false;
     }
 
-    $invite_code  = strtoupper(substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"), 0, 6));
-    $workspace_id = createWorkspace($name, $description, $user_id, $invite_code);
+    $workspace_id = $workspace['id'];
 
-    if ($workspace_id) {
-        $_SESSION['workspace_id'] = $workspace_id;
-        header("Location: ../View/navbar.php");
-    } else {
-        $_SESSION['workspaceError'] = "Could not create workspace, please try again";
-        header("Location: ../View/onbroading.php");
+    // Prevent duplicate membership
+    $checkSql = "SELECT id FROM workspace_members WHERE workspace_id=$workspace_id AND user_id=$user_id";
+    $checkRes = mysqli_query($conn, $checkSql);
+    if (mysqli_num_rows($checkRes) > 0) {
+        mysqli_close($conn);
+        return $workspace_id;
     }
-    exit();
+
+    $sql2 = "INSERT INTO workspace_members (workspace_id, user_id) VALUES ($workspace_id, $user_id)";
+    mysqli_query($conn, $sql2);
+    mysqli_close($conn);
+    return $workspace_id;
 }
 
-// JOIN WORKSPACE 
-if (isset($_POST['join_workspace'])) {
-    $code = trim($_POST['invite_code'] ?? '');
+function getUserWorkspaces($user_id) {
+    $conn = openConnection();
 
-    if ($code === '') {
-        $_SESSION['joinError'] = "Please enter an invite code";
-        header("Location: ../View/onbroading.php");
-        exit();
-    }
-
-    $workspace_id = joinWorkspace($code, $user_id);
-
-    if ($workspace_id) {
-        $_SESSION['workspace_id'] = $workspace_id;
-        header("Location: ../View/navbar.php");
-    } else {
-        $_SESSION['joinError'] = "Invalid invite code";
-        header("Location: ../View/onbroading.php");
-    }
-    exit();
+    $sql    = "SELECT workspaces.* FROM workspaces
+               JOIN workspace_members ON workspaces.id = workspace_members.workspace_id
+               WHERE workspace_members.user_id=$user_id";
+    $result = mysqli_query($conn, $sql);
+    $workspaces = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_close($conn);
+    return $workspaces;
 }
 
-//WORKSPACE SWITCHER  GET /workspace/switch/{id}
-// 
-if (isset($_GET['switch'])) {
-    $new_workspace_id = (int) $_GET['switch'];
+function getWorkspaceById($workspace_id) {
+    $conn = openConnection();
 
-    if ($new_workspace_id > 0 && isMember($new_workspace_id, $user_id)) {
-        $_SESSION['workspace_id'] = $new_workspace_id;
-    }
-    // Redirect back to the project list (navbar is the project list for now)
-    header("Location: ../View/navbar.php");
-    exit();
+    $sql       = "SELECT * FROM workspaces WHERE id=$workspace_id";
+    $result    = mysqli_query($conn, $sql);
+    $workspace = mysqli_fetch_assoc($result);
+    mysqli_close($conn);
+    return $workspace;
 }
 
-// ── AJAX: DELETE MEMBER 
-// DELETE  (sent as POST with action=delete for simplicity)
-if (isset($_POST['action']) && $_POST['action'] === 'delete') {
-    header('Content-Type: application/json');
+function getWorkspaceMembers($workspace_id) {
+    $conn = openConnection();
 
-    $member_row_id    = (int) ($_POST['id'] ?? 0);
-    $workspace_id     = (int) ($_SESSION['workspace_id'] ?? 0);
+    $sql    = "SELECT workspace_members.id AS member_id,
+                      users.id AS user_id,
+                      users.name,
+                      workspace_members.joined_at
+               FROM workspace_members
+               JOIN users ON users.id = workspace_members.user_id
+               WHERE workspace_members.workspace_id=$workspace_id
+               ORDER BY workspace_members.joined_at ASC";
+    $result  = mysqli_query($conn, $sql);
+    $members = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_close($conn);
+    return $members;
+}
 
-    // Only the workspace owner can remove members
-    $workspace = getWorkspaceById($workspace_id);
-    if (!$workspace || $workspace['owner_id'] != $user_id) {
-        echo json_encode(['status' => 'error', 'message' => 'Not authorised']);
-        exit();
-    }
+function removeMember($member_row_id) {
+    $conn = openConnection();
 
-    // Prevent the owner from removing themselves
-    $members = getWorkspaceMembers($workspace_id);
-    foreach ($members as $m) {
-        if ($m['member_id'] == $member_row_id && $m['user_id'] == $user_id) {
-            echo json_encode(['status' => 'error', 'message' => 'Cannot remove yourself']);
-            exit();
-        }
-    }
+    $sql = "DELETE FROM workspace_members WHERE id=$member_row_id";
+    $res = mysqli_query($conn, $sql);
+    mysqli_close($conn);
+    return $res;
+}
 
-    if (removeMember($member_row_id)) {
-        echo json_encode(['status' => 'success']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Delete failed']);
-    }
-    exit();
+function isMember($workspace_id, $user_id) {
+    $conn = openConnection();
+
+    $sql    = "SELECT id FROM workspace_members WHERE workspace_id=$workspace_id AND user_id=$user_id";
+    $result = mysqli_query($conn, $sql);
+    $found  = mysqli_num_rows($result) > 0;
+    mysqli_close($conn);
+    return $found;
 }
 ?>

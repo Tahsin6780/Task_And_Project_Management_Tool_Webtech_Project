@@ -21,19 +21,27 @@ class TaskController {
         require "views/tasks/board.php";
     }
 
-    public function updateStatus() {
 
-        $data = json_decode(file_get_contents("php://input"), true);
 
-        $task_id = $data['task_id'];
-        $status = $data['status'];
 
-        $result = $this->model->changeStatus($task_id, $status);
+public function updateStatus($data) {
 
-        echo json_encode([
-            "success" => $result,
-            "new_status" => $status
-        ]);
-    }
+    $task_id = $data['task_id'];
+    $status = $data['status'];
+
+    $result = $this->model->changeStatus($task_id, $status);
+
+    return [
+        "success" => $result,
+        "task_id" => $task_id,
+        "new_status" => $status
+    ];
+}
+
+
+
+
+
+
 }
 ?>

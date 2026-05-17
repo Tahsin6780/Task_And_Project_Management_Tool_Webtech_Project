@@ -36,18 +36,18 @@
 
 <div class="board">
 
-    <!-- TODO -->
+    <!-- TO DO -->
     <div class="col">
         <h3>To Do</h3>
 
         <?php foreach($todo as $t): ?>
-            <div class="task">
-    <?= $t['title'] ?>
+            <div class="task" data-id="<?= $t['id'] ?>">
+                <?= $t['title'] ?>
 
-    <button onclick="move(<?= $t['id'] ?>,'in-progress')">→</button>
-    <button onclick="move(<?= $t['id'] ?>,'todo')">←</button>
-    <button onclick="move(<?= $t['id'] ?>,'done')">✓</button>
-</div>
+                <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">→</button>
+                <button onclick="moveTask(<?= $t['id'] ?>,'todo')">←</button>
+                <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
+            </div>
         <?php endforeach; ?>
 
     </div>
@@ -57,13 +57,13 @@
         <h3>In Progress</h3>
 
         <?php foreach($inprogress as $t): ?>
-            <div class="task">
-    <?= $t['title'] ?>
+            <div class="task" data-id="<?= $t['id'] ?>">
+                <?= $t['title'] ?>
 
-    <button onclick="move(<?= $t['id'] ?>,'in-progress')">→</button>
-    <button onclick="move(<?= $t['id'] ?>,'todo')">←</button>
-    <button onclick="move(<?= $t['id'] ?>,'done')">✓</button>
-</div>
+                <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">→</button>
+                <button onclick="moveTask(<?= $t['id'] ?>,'todo')">←</button>
+                <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
+            </div>
         <?php endforeach; ?>
 
     </div>
@@ -73,20 +73,22 @@
         <h3>Done</h3>
 
         <?php foreach($done as $t): ?>
-            <div class="task">
-    <?= $t['title'] ?>
+            <div class="task" data-id="<?= $t['id'] ?>">
+                <?= $t['title'] ?>
 
-    <button onclick="move(<?= $t['id'] ?>,'in-progress')">→</button>
-    <button onclick="move(<?= $t['id'] ?>,'todo')">←</button>
-    <button onclick="move(<?= $t['id'] ?>,'done')">✓</button>
-</div>
+                <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">→</button>
+                <button onclick="moveTask(<?= $t['id'] ?>,'todo')">←</button>
+                <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
+            </div>
         <?php endforeach; ?>
 
     </div>
 
 </div>
+
+<!-- AJAX SCRIPT -->
 <script>
-async function move(task_id, status) {
+async function moveTask(task_id, status) {
 
     let res = await fetch("update_status.php", {
         method: "POST",
@@ -102,9 +104,22 @@ async function move(task_id, status) {
     let data = await res.json();
 
     if(data.success) {
-        location.reload(); // simple MVC safe method
+
+        let task = document.querySelector(`[data-id='${task_id}']`);
+        task.remove();
+
+        if(status === "todo") {
+            document.querySelectorAll(".col")[0].appendChild(task);
+        }
+        else if(status === "in-progress") {
+            document.querySelectorAll(".col")[1].appendChild(task);
+        }
+        else if(status === "done") {
+            document.querySelectorAll(".col")[2].appendChild(task);
+        }
     }
 }
 </script>
+
 </body>
 </html>

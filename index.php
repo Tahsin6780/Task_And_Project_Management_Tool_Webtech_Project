@@ -59,6 +59,10 @@ if ($page === 'projects') {
 	$controller->archive($_GET['id'] ?? null);
 } elseif ($page === 'ajax_archive_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 	$controller->archiveAjax($_POST['id'] ?? null);
+} elseif ($page === 'ajax_unarchive_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+	$controller->unarchiveAjax($_POST['id'] ?? null);
+} elseif ($page === 'ajax_delete_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+	$controller->deleteAjax($_POST['id'] ?? null);
 } elseif ($page === 'archived_projects') {
 	$controller->archived();
 } else {

@@ -85,17 +85,7 @@ document.querySelectorAll('.archive-btn').forEach(button => {
 				return;
 			}
 
-			const card = document.querySelector(`#project-card-${projectId}`);
-
-			if (card) {
-				card.classList.add('fade-out');
-
-				setTimeout(() => {
-					card.remove();
-					checkEmptyProjectList();
-				}, 300);
-			}
-
+			removeProjectCard(projectId);
 			showMessage('Project archived successfully.', 'success');
 		} catch (error) {
 			showMessage('AJAX request failed.', 'error');
@@ -104,6 +94,93 @@ document.querySelectorAll('.archive-btn').forEach(button => {
 		}
 	});
 });
+
+document.querySelectorAll('.unarchive-btn').forEach(button => {
+	button.addEventListener('click', async () => {
+		const projectId = button.dataset.projectId;
+
+		const confirmUnarchive = confirm('Move this project back to active projects?');
+
+		if (!confirmUnarchive) {
+			return;
+		}
+
+		button.disabled = true;
+		button.textContent = 'Restoring...';
+
+		await sendArchivedProjectAction(
+			'index.php?page=ajax_unarchive_project',
+			projectId,
+			'Project restored to active projects.',
+			button,
+			'Unarchive'
+		);
+	});
+});
+
+document.querySelectorAll('.delete-btn').forEach(button => {
+	button.addEventListener('click', async () => {
+		const projectId = button.dataset.projectId;
+
+		const confirmDelete = confirm('Delete this project permanently? This cannot be undone.');
+
+		if (!confirmDelete) {
+			return;
+		}
+
+		button.disabled = true;
+		button.textContent = 'Deleting...';
+
+		await sendArchivedProjectAction(
+			'index.php?page=ajax_delete_project',
+			projectId,
+			'Project deleted permanently.',
+			button,
+			'Delete'
+		);
+	});
+});
+
+async function sendArchivedProjectAction(url, projectId, successMessage, button, originalText) {
+	const formData = new FormData();
+	formData.append('id', projectId);
+
+	try {
+		const response = await fetch(url, {
+			method: 'POST',
+			body: formData
+		});
+
+		const data = await response.json();
+
+		if (!data.ok) {
+			showMessage(data.message || 'Action failed.', 'error');
+			button.disabled = false;
+			button.textContent = originalText;
+			return;
+		}
+
+		removeProjectCard(projectId);
+		showMessage(successMessage, 'success');
+	} catch (error) {
+		showMessage('AJAX request failed.', 'error');
+		button.disabled = false;
+		button.textContent = originalText;
+	}
+}
+
+function removeProjectCard(projectId) {
+	const card = document.querySelector(`#project-card-${projectId}`);
+
+	if (card) {
+		card.classList.add('fade-out');
+
+		setTimeout(() => {
+			card.remove();
+			checkEmptyProjectList();
+		}, 300);
+	}
+}
 
 function showMessage(message, type) {
 	const box = document.querySelector('#ajax-message');
@@ -133,7 +210,7 @@ function checkEmptyProjectList() {
 		const empty = document.createElement('div');
 		empty.className = 'card';
 		empty.id = 'empty-state';
-		empty.innerHTML = '<p>No active projects yet.</p>';
+		empty.innerHTML = '<p>No projects found.</p>';
 
 		grid.parentNode.insertBefore(empty, grid);
 	}

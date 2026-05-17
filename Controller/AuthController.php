@@ -3,7 +3,7 @@ session_start();
 include_once "../Config/db.php";
 include_once "../Model/User.php";
 
-// REGISTER 
+// ── REGISTER ──────────────────────────────────────────────
 if (isset($_POST['register'])) {
     $name     = trim($_POST['name']     ?? '');
     $email    = trim($_POST['email']    ?? '');
@@ -33,8 +33,7 @@ if (isset($_POST['register'])) {
         exit();
     }
 
-    $user   = new User();
-    $result = $user->register($name, $email, $password);
+    $result = registerUser($name, $email, $password);
 
     if ($result === 'duplicate') {
         $_SESSION['emailError'] = "An account with this email already exists";
@@ -52,7 +51,7 @@ if (isset($_POST['register'])) {
     exit();
 }
 
-// LOGIN 
+// ── LOGIN ─────────────────────────────────────────────────
 if (isset($_POST['login'])) {
     $email    = trim($_POST['email']    ?? '');
     $password = $_POST['password']       ?? '';
@@ -75,16 +74,14 @@ if (isset($_POST['login'])) {
         exit();
     }
 
-    $userModel = new User();
-    $user      = $userModel->login($email, $password);
+    $user = loginUser($email, $password);
 
     if ($user) {
         $_SESSION['user_id']    = $user['id'];
         $_SESSION['name']       = $user['name'];
         $_SESSION['isLoggedIn'] = true;
 
-        // Set workspace_id to the user's first workspace (or null if none)
-        $workspace_id = $userModel->getFirstWorkspace($user['id']);
+        $workspace_id = getFirstWorkspace($user['id']);
         $_SESSION['workspace_id'] = $workspace_id;
 
         if ($workspace_id) {
@@ -100,7 +97,7 @@ if (isset($_POST['login'])) {
     exit();
 }
 
-// ── LOGOUT 
+// ── LOGOUT
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();

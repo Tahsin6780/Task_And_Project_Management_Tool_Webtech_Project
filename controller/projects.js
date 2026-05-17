@@ -1,21 +1,58 @@
 document.querySelectorAll('.project-form').forEach(form => {
 	form.addEventListener('submit', event => {
+		clearClientErrors(form);
+
+		let hasError = false;
+
 		const nameInput = form.querySelector('input[name="name"]');
 		const selectedMembers = form.querySelectorAll('input[name="member_ids[]"]:checked');
 
 		if (!nameInput || nameInput.value.trim() === '') {
-			event.preventDefault();
-			alert('Project name is required.');
-			return;
+			showClientError(nameInput, 'Project name is required.');
+			hasError = true;
 		}
 
 		if (selectedMembers.length === 0) {
+			const membersLabel = findMembersLabel(form);
+			showClientError(membersLabel, 'Select at least one project member.');
+			hasError = true;
+		}
+
+		if (hasError) {
 			event.preventDefault();
-			alert('Select at least one project member.');
-			return;
 		}
 	});
 });
+
+function clearClientErrors(form) {
+	form.querySelectorAll('.client-error').forEach(error => {
+		error.remove();
+	});
+}
+
+function showClientError(element, message) {
+	if (!element) {
+		return;
+	}
+
+	const error = document.createElement('small');
+	error.className = 'error client-error';
+	error.textContent = message;
+
+	element.insertAdjacentElement('afterend', error);
+}
+
+function findMembersLabel(form) {
+	const labels = form.querySelectorAll('label');
+
+	for (const label of labels) {
+		if (label.textContent.trim() === 'Members') {
+			return label;
+		}
+	}
+
+	return form;
+}
 
 document.querySelectorAll('.archive-btn').forEach(button => {
 	button.addEventListener('click', async () => {

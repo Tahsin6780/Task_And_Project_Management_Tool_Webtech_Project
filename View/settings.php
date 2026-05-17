@@ -1,97 +1,73 @@
 <?php
 session_start();
 
-require_once('../Config/db.php');
-
-if(!isset($_SESSION['user_id']))
-{
-    header("location: login.php");
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
 }
 
-$conn = openConnection();
+require_once('../Model/Workspace.php');
 
-$workspace_id = $_SESSION['workspace_id'];
+$workspace_id = $_SESSION['workspace_id'] ?? 0;
+$user_id      = $_SESSION['user_id'];
 
-$sql = "SELECT workspace_members.id,users.name,workspace_members.joined_at,workspaces.owner_id,users.id as user_id
+if (!$workspace_id) {
+    header("Location: onbroading.php");
+    exit();
+}
 
-        FROM workspace_members
+$workspace = getWorkspaceById($workspace_id);
 
-        JOIN users
-        ON workspace_members.user_id = users.id
+// Only the owner can access this page
+if (!$workspace || $workspace['owner_id'] != $user_id) {
+    header("Location: navbar.php");
+    exit();
+}
 
-        JOIN workspaces
-        ON workspace_members.workspace_id = workspaces.id
-
-        WHERE workspace_members.workspace_id='$workspace_id'";
-
-$result = mysqli_query($conn, $sql);
-
-$members = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-mysqli_close($conn);
+$members = getWorkspaceMembers($workspace_id);
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
-
     <title>Workspace Settings</title>
-
-    <script src="../Asset/Script.js"></script>
-
 </head>
-
 <body>
 
-<h2>Workspace Members</h2>
+<h2>Workspace Settings: <?php echo htmlspecialchars($workspace['name']); ?></h2>
+<p>Invite Code: <strong><?php echo htmlspecialchars($workspace['invite_code']); ?></strong></p>
 
-<table border="1" cellpadding="10">
+<a href="navbar.php">&larr; Back to Dashboard</a>
 
-    <tr>
-        <th>Name</th>
-        <th>Join Date</th>
-        <th>Action</th>
-    </tr>
+<h3>Members</h3>
 
-<?php
-foreach($members as $member)
-{
-?>
-
-<tr id="row<?php echo $member['id']; ?>">
-
-    <td>
-        <?php echo $member['name']; ?>
-    </td>
-
-    <td>
-        <?php echo $member['joined_at']; ?>
-    </td>
-
-    <td>
-
-<?php
-if($_SESSION['user_id'] == $member['owner_id']&& $_SESSION['user_id'] != $member['user_id'])
-{
-?>
-
-<button onclick="removeMember(<?php echo $member['id']; ?>)">
-    Remove
-</button>
-
-<?php
-}
-?>
-
-    </td>
-
-</tr>
-
-<?php
-}
-?>
-
+<table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Joined</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($members as $member): ?>
+        <tr id="row<?php echo $member['member_id']; ?>">
+            <td><?php echo htmlspecialchars($member['name']); ?></td>
+            <td><?php echo htmlspecialchars($member['joined_at']); ?></td>
+            <td>
+                <?php if ($member['user_id'] != $user_id): ?>
+                    <button onclick="removeMember(<?php echo $member['member_id']; ?>)">
+                        Remove
+                    </button>
+                <?php else: ?>
+                    (You — owner)
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
 </table>
+
+<script src="../Asset/Script.js"></script>
 
 </body>
 </html>

@@ -87,7 +87,7 @@ if (isset($_POST['login'])) {
         if ($workspace_id) {
             header("Location: ../View/navbar.php");
         } else {
-            header("Location: ../View/onbroading.php");
+            header("Location: ../View/onboarding.php");
         }
     } else {
         $_SESSION['loginError'] = "Invalid email or password";

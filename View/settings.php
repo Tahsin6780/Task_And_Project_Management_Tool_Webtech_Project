@@ -12,7 +12,7 @@ $workspace_id = $_SESSION['workspace_id'] ?? 0;
 $user_id      = $_SESSION['user_id'];
 
 if (!$workspace_id) {
-    header("Location: onbroading.php");
+    header("Location: onboarding.php");
     exit();
 }
 
@@ -37,7 +37,7 @@ $members = getWorkspaceMembers($workspace_id);
 <p>Invite Code: <strong><?php echo htmlspecialchars($workspace['invite_code']); ?></strong></p>
 
 <a href="navbar.php">&larr; Back to Dashboard</a>
-
+&nbsp;|&nbsp; <a href="../Controller/AuthController.php?logout=1">Logout</a>
 <h3>Members</h3>
 
 <table border="1" cellpadding="6" cellspacing="0">

@@ -18,6 +18,7 @@ unset($_SESSION['workspaceError'], $_SESSION['joinError']);
 <body>
 
 <h2>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>!</h2>
+<a href="../Controller/AuthController.php?logout=1">Logout</a>
 <p>You are not part of any workspace yet. Create a new one or join an existing one.</p>
 
 <h3>Create a Workspace</h3>

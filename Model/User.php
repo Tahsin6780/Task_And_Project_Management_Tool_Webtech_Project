@@ -9,11 +9,7 @@ class User{
         $this->connection = openConnection();
     }
 
-    function register(
-            $name,
-            $email,
-            $password
-        ){
+    function register($name,$email,$password){
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
             $sql = "INSERT INTO users (name, email, password_hash)VALUES('".$name."','".$email."','".$hashedPassword."')";

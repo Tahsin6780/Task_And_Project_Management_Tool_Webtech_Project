@@ -4,9 +4,7 @@ let xhr = new XMLHttpRequest();
 
 xhr.open("POST", "../Controller/WorkspaceController.php", true);
 
-xhr.setRequestHeader(
-    "Content-type",
-    "application/x-www-form-urlencoded");
+xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 xhr.onload = function () {
 

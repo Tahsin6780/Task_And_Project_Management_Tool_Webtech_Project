@@ -42,8 +42,12 @@
 
         <?php foreach($todo as $t): ?>
             <div class="task">
-                <?= $t['title'] ?>
-            </div>
+    <?= $t['title'] ?>
+
+    <button onclick="move(<?= $t['id'] ?>,'in-progress')">→</button>
+    <button onclick="move(<?= $t['id'] ?>,'todo')">←</button>
+    <button onclick="move(<?= $t['id'] ?>,'done')">✓</button>
+</div>
         <?php endforeach; ?>
 
     </div>
@@ -54,8 +58,12 @@
 
         <?php foreach($inprogress as $t): ?>
             <div class="task">
-                <?= $t['title'] ?>
-            </div>
+    <?= $t['title'] ?>
+
+    <button onclick="move(<?= $t['id'] ?>,'in-progress')">→</button>
+    <button onclick="move(<?= $t['id'] ?>,'todo')">←</button>
+    <button onclick="move(<?= $t['id'] ?>,'done')">✓</button>
+</div>
         <?php endforeach; ?>
 
     </div>
@@ -66,13 +74,37 @@
 
         <?php foreach($done as $t): ?>
             <div class="task">
-                <?= $t['title'] ?>
-            </div>
+    <?= $t['title'] ?>
+
+    <button onclick="move(<?= $t['id'] ?>,'in-progress')">→</button>
+    <button onclick="move(<?= $t['id'] ?>,'todo')">←</button>
+    <button onclick="move(<?= $t['id'] ?>,'done')">✓</button>
+</div>
         <?php endforeach; ?>
 
     </div>
 
 </div>
+<script>
+async function move(task_id, status) {
 
+    let res = await fetch("update_status.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            task_id: task_id,
+            status: status
+        })
+    });
+
+    let data = await res.json();
+
+    if(data.success) {
+        location.reload(); // simple MVC safe method
+    }
+}
+</script>
 </body>
 </html>

@@ -19,5 +19,14 @@ class TaskModel {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function changeStatus($task_id, $status) {
+
+        $sql = "UPDATE tasks SET status = ? WHERE id = ?";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        return $stmt->execute([$status, $task_id]);
+    }
 }
 ?>

@@ -61,6 +61,14 @@
 					>
 						Archive
 					</button>
+
+					<button
+						type="button"
+						class="delete-btn"
+						data-project-id="<?= e($project['id']) ?>"
+					>
+						Delete
+					</button>
 				</div>
 			</div>
 		<?php endforeach; ?>

@@ -140,6 +140,7 @@ textarea {
 	display: flex;
 	gap: 12px;
 	align-items: center;
+	flex-wrap: wrap;
 }
 
 .actions a {

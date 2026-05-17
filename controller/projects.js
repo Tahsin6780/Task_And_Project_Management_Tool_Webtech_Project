@@ -108,7 +108,7 @@ document.querySelectorAll('.unarchive-btn').forEach(button => {
 		button.disabled = true;
 		button.textContent = 'Restoring...';
 
-		await sendArchivedProjectAction(
+		await sendProjectAction(
 			'index.php?page=ajax_unarchive_project',
 			projectId,
 			'Project restored to active projects.',
@@ -131,7 +131,7 @@ document.querySelectorAll('.delete-btn').forEach(button => {
 		button.disabled = true;
 		button.textContent = 'Deleting...';
 
-		await sendArchivedProjectAction(
+		await sendProjectAction(
 			'index.php?page=ajax_delete_project',
 			projectId,
 			'Project deleted permanently.',
@@ -141,7 +141,7 @@ document.querySelectorAll('.delete-btn').forEach(button => {
 	});
 });
 
-async function sendArchivedProjectAction(url, projectId, successMessage, button, originalText) {
+async function sendProjectAction(url, projectId, successMessage, button, originalText) {
 	const formData = new FormData();
 	formData.append('id', projectId);
 

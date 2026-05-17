@@ -80,7 +80,7 @@ unset($_SESSION["email"]);
                 <td></td>
 
                 <td>
-                    <input type="submit" name="submit" value="Register">
+                    <input type="submit" name="register" value="Register">
                 </td>
             </tr>
 

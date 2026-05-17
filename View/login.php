@@ -10,7 +10,7 @@ $email = $_SESSION["email"] ?? "";
 
 $isLoggedIn = $_SESSION["isLoggedIn"] ?? false;
 
-if($isLoggedIn){
+if ($isLoggedIn) {
 
     //header("Location: dashboard.php");
     exit();
@@ -31,81 +31,81 @@ unset($_SESSION["email"]);
 
 <body>
 
-<h2>Login Form</h2>
+    <h2>Login Form</h2>
 
-<form method="post" action="../Controller/AuthController.php">
+    <form method="post" action="../Controller/AuthController.php">
 
-<table>
+        <table>
 
-<tr>
+            <tr>
 
-    <td>Email</td>
+                <td>Email</td>
 
-    <td>
-        <input
-        type="text"
-        name="email"
-        value="<?php echo $email; ?>">
-    </td>
+                <td>
+                    <input
+                        type="text"
+                        name="email"
+                        value="<?php echo $email; ?>">
+                </td>
 
-    <td style="color:red;">
-        <?php echo $emailError; ?>
-    </td>
+                <td style="color:red;">
+                    <?php echo $emailError; ?>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-    <td>Password</td>
+                <td>Password</td>
 
-    <td>
-        <input type="password" name="password">
-    </td>
+                <td>
+                    <input type="password" name="password">
+                </td>
 
-    <td style="color:red;">
-        <?php echo $passwordError; ?>
-    </td>
+                <td style="color:red;">
+                    <?php echo $passwordError; ?>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-    <td></td>
+                <td></td>
 
-    <td style="color:red;">
-        <?php echo $loginError; ?>
-    </td>
+                <td style="color:red;">
+                    <?php echo $loginError; ?>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-    <td></td>
+                <td></td>
 
-    <td>
-        <input
-        type="submit"
-        name="submit"
-        value="Login">
-    </td>
+                <td>
+                    <input
+                        type="submit"
+                        name="login"
+                        value="Login">
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-    <td></td>
+                <td></td>
 
-    <td>
-        <a href="register.php">
-            Create New Account
-        </a>
-    </td>
+                <td>
+                    <a href="register.php">
+                        Create New Account
+                    </a>
+                </td>
 
-</tr>
+            </tr>
 
-</table>
+        </table>
 
-</form>
+    </form>
 
 </body>
 

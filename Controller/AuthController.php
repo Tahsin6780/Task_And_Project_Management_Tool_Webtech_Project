@@ -5,7 +5,7 @@ include_once "../Config/db.php";
 include_once "../Model/User.php";
 
 
-if(isset($_POST['submit'])){
+if(isset($_POST['register'])){
     $name = $_POST["name"];
     $email = $_POST["email"];
     $password = $_POST["password"];
@@ -27,7 +27,7 @@ if(isset($_POST['submit'])){
     exit();
 }
 
-if (isset($_POST['submit'])) {
+if (isset($_POST['login'])) {
     $email = $_POST["email"];
     $password = $_POST["password"];
 
@@ -43,7 +43,7 @@ if (isset($_POST['submit'])) {
         if ($_SESSION["workspace_id"]) {
             header("Location: ../View/dashboard.php");
         } else {
-            header("Location: ../View/workspace_prompt.php"); 
+            header("Location: ../View/workspace.php"); 
         }
     } else {
         $_SESSION["loginError"] = "Invalid email or password";

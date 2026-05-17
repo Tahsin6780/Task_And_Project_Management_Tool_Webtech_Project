@@ -1,4 +1,4 @@
+
 <?php
-//('location:../view/login.php');
-header('location: view/register.php');
+Header('location: view/login.php');
 ?>

@@ -171,7 +171,29 @@ textarea {
 	font-size: 16px;
 }
 
-.archive-btn:disabled {
+.unarchive-btn {
+	background: transparent;
+	border: none;
+	color: var(--green);
+	font-weight: bold;
+	cursor: pointer;
+	padding: 0;
+	font-size: 16px;
+}
+
+.delete-btn {
+	background: transparent;
+	border: none;
+	color: var(--red);
+	font-weight: bold;
+	cursor: pointer;
+	padding: 0;
+	font-size: 16px;
+}
+
+.archive-btn:disabled,
+.unarchive-btn:disabled,
+.delete-btn:disabled {
 	color: var(--gray);
 	cursor: not-allowed;
 }

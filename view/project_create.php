@@ -63,6 +63,6 @@
 	</form>
 </div>
 
-<script src="view/projects.js"></script>
+<script src="controller/projects.js"></script>
 </body>
 </html>

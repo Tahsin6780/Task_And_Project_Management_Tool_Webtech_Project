@@ -190,6 +190,25 @@ class Project {
 		return $stmt->execute([$project_id, $workspace_id]);
 	}
 
+    public function unarchiveProject($project_id, $workspace_id) {
+	$stmt = $this->pdo->prepare("
+		UPDATE projects
+		SET is_archived = 0
+		WHERE id = ? AND workspace_id = ?
+	");
+
+	return $stmt->execute([$project_id, $workspace_id]);
+}
+
+public function deleteProject($project_id, $workspace_id) {
+	$stmt = $this->pdo->prepare("
+		DELETE FROM projects
+		WHERE id = ? AND workspace_id = ?
+	");
+
+	return $stmt->execute([$project_id, $workspace_id]);
+}
+
 	public function getTaskSummary($project_id) {
 		$stmt = $this->pdo->prepare("
 			SELECT status, COUNT(*) AS total

@@ -1,26 +1,16 @@
 <?php
-class mydb {
 
-    public function createConObject() {
+    function openConnection(){
+        $db_host = "127.0.0.1"; 
+        $db_user = "root";
+        $db_password = "";
+        $db_name = "project_management_db";
 
-        $servername = "localhost";
-        $username   = "root";
-        $password   = "";
-        $dbname     = "pet-daycare";   
-
-        $conn = new mysqli($servername, $username, $password, $dbname);
-
-        if ($conn->connect_error) {
-            die("Database Connection Failed: " . $conn->connect_error);
+        $connection = new mysqli($db_host,$db_user, $db_password, $db_name);
+        if($connection->connect_error){
+            die("Could not connect to the database- ". $connection->connect_error);
         }
 
-        return $conn;
+    return $connection;
     }
-}
-
-function getConnection() {
-    $db = new mydb();
-    return $db->createConObject();
-}
 ?>
-

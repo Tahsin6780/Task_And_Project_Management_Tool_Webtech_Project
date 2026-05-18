@@ -218,6 +218,38 @@ class Project {
 		");
 
 		$stmt->execute([$project_id]);
+
+		$summary = [
+			'todo' => 0,
+			'in-progress' => 0,
+			'done' => 0
+		];
+
+		foreach ($stmt->fetchAll() as $row) {
+			$summary[$row['status']] = (int)$row['total'];
+		}
+
+		return $summary;
+	}
+
+	public function getMemberAssignedTaskCounts($project_id) {
+		$stmt = $this->pdo->prepare("
+			SELECT
+				u.id,
+				u.name,
+				u.email,
+				COUNT(t.id) AS assigned_task_count
+			FROM project_members pm
+			JOIN users u ON u.id = pm.user_id
+			LEFT JOIN tasks t
+				ON t.assigned_to = u.id
+				AND t.project_id = pm.project_id
+			WHERE pm.project_id = ?
+			GROUP BY u.id, u.name, u.email
+			ORDER BY u.name ASC
+		");
+
+		$stmt->execute([$project_id]);
 		return $stmt->fetchAll();
 	}
 }

@@ -1,3 +1,25 @@
+document.querySelectorAll('.swatch-option').forEach(option => {
+	option.addEventListener('click', () => {
+		const group = option.closest('.color-options');
+
+		if (!group) {
+			return;
+		}
+
+		group.querySelectorAll('.swatch-option').forEach(item => {
+			item.classList.remove('selected');
+		});
+
+		option.classList.add('selected');
+
+		const radio = option.querySelector('input[type="radio"]');
+
+		if (radio) {
+			radio.checked = true;
+		}
+	});
+});
+
 document.querySelectorAll('.project-form').forEach(form => {
 	form.addEventListener('submit', event => {
 		clearClientErrors(form);
@@ -46,7 +68,7 @@ function findMembersLabel(form) {
 	const labels = form.querySelectorAll('label');
 
 	for (const label of labels) {
-		if (label.textContent.trim() === 'Members') {
+		if (label.textContent.trim() === 'Project Members' || label.textContent.trim() === 'Members') {
 			return label;
 		}
 	}
@@ -54,7 +76,7 @@ function findMembersLabel(form) {
 	return form;
 }
 
-document.querySelectorAll('.archive-btn').forEach(button => {
+document.querySelectorAll('.archive-btn[data-project-id]').forEach(button => {
 	button.addEventListener('click', async () => {
 		const projectId = button.dataset.projectId;
 

@@ -5,37 +5,87 @@
     <title>Task Board</title>
 
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+        }
+
         .board {
             display: flex;
             gap: 20px;
+            padding: 10px;
         }
 
         .col {
             width: 33%;
-            background: #f5f5f5;
-            padding: 10px;
+            background: #f8fafc;
+            padding: 12px;
             min-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .col h3 {
+            text-align: center;
+            color: #333;
         }
 
         .task {
             background: white;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            transition: 0.2s;
         }
 
-        h3 {
-            text-align: center;
+        .task:hover {
+            transform: scale(1.02);
         }
 
         .avatar {
             display:inline-block;
-            background:#333;
+            background:#2563eb;
             color:white;
-            padding:3px 7px;
+            padding:4px 8px;
             border-radius:50%;
             font-size:12px;
             margin-bottom:5px;
+        }
+
+        /* ================= PRIORITY BADGES (FIXED VISIBILITY) ================= */
+        .priority {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .low {
+            background: #10b981;   /* green */
+        }
+
+        .medium {
+            background: #f59e0b;   /* orange */
+        }
+
+        .high {
+            background: #ef4444;   /* red */
+        }
+
+        button {
+            margin: 2px;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -64,9 +114,13 @@
 
             <strong><?= $t['title'] ?></strong><br>
 
+            <!-- PRIORITY FIXED -->
+            <span class="priority <?= $t['priority'] ?>">
+                <?= strtoupper($t['priority']) ?>
+            </span><br>
+
             <small><?= $t['due_date'] ?></small><br>
 
-            <!-- MOVE BUTTONS -->
             <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">→</button>
             <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
         </div>
@@ -89,9 +143,13 @@
 
             <strong><?= $t['title'] ?></strong><br>
 
+            <!-- PRIORITY FIXED -->
+            <span class="priority <?= $t['priority'] ?>">
+                <?= strtoupper($t['priority']) ?>
+            </span><br>
+
             <small><?= $t['due_date'] ?></small><br>
 
-            <!-- MOVE BUTTONS -->
             <button onclick="moveTask(<?= $t['id'] ?>,'todo')">←</button>
             <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
         </div>
@@ -114,9 +172,13 @@
 
             <strong><?= $t['title'] ?></strong><br>
 
+            <!-- PRIORITY FIXED -->
+            <span class="priority <?= $t['priority'] ?>">
+                <?= strtoupper($t['priority']) ?>
+            </span><br>
+
             <small><?= $t['due_date'] ?></small><br>
 
-            <!-- MOVE BACK -->
             <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">←</button>
         </div>
         <?php endforeach; ?>
@@ -124,8 +186,8 @@
 
 </div>
 
-<!-- ================= MODAL ================= -->
-<div id="taskModal" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid black;">
+<!-- MODAL -->
+<div id="taskModal" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border-radius:10px; border:1px solid #ccc;">
 
     <h3>Create Task</h3>
 
@@ -135,7 +197,6 @@
 
         <textarea name="description" placeholder="Description"></textarea><br><br>
 
-        <!-- ASSIGNED MEMBER -->
         <select name="assigned_to" required>
             <option value="">-- Select Member --</option>
             <?php foreach($members as $m): ?>
@@ -163,8 +224,7 @@
     </form>
 </div>
 
-<!-- ================= JS ================= -->
-
+<!-- JS (UNCHANGED LOGIC) -->
 <script>
 function openModal() {
     document.getElementById("taskModal").style.display = "block";
@@ -178,13 +238,10 @@ function closeModal() {
 <script>
 async function moveTask(task_id, status) {
 
-    let res = await fetch("api/tasks/status.php", {
+    let res = await fetch("api/task_board/update_status.php", {
         method: "PUT",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-            task_id,
-            status
-        })
+        body: JSON.stringify({ task_id, status })
     });
 
     let data = await res.json();
@@ -217,7 +274,7 @@ document.getElementById("taskForm").addEventListener("submit", async function(e)
     let formData = new FormData(this);
     let data = Object.fromEntries(formData);
 
-    let res = await fetch("create_task.php", {
+    let res = await fetch("api/task_board/create.php", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify(data)

@@ -83,6 +83,10 @@ class ProjectController {
 		$workspace_id = $this->workspaceId();
 		$projects = $this->projectModel->getActiveProjects($workspace_id);
 
+		foreach ($projects as $key => $project) {
+			$projects[$key]['members'] = $this->projectModel->getProjectMembers($project['id']);
+		}
+
 		require 'view/project_list.php';
 	}
 
@@ -128,7 +132,7 @@ class ProjectController {
 			return;
 		}
 
-		$members = $this->projectModel->getProjectMembers($id);
+		$members = $this->projectModel->getMemberAssignedTaskCounts($id);
 		$summary = $this->projectModel->getTaskSummary($id);
 
 		require 'view/project_show.php';
@@ -186,9 +190,16 @@ class ProjectController {
 	public function archive($id) {
 		$workspace_id = $this->workspaceId();
 
+		$project = $this->projectModel->findProject($id, $workspace_id);
+
+		if (!$project) {
+			echo "Project not found.";
+			return;
+		}
+
 		$this->projectModel->archiveProject($id, $workspace_id);
 
-		header("Location: index.php?page=archived_projects");
+		header("Location: index.php?page=projects");
 		exit;
 	}
 

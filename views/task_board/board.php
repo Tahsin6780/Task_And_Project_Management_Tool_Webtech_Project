@@ -1,295 +1,256 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Task Board</title>
-
+    <meta charset="UTF-8">
+    <title>Kanban Task Board</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #eef2f7;
-        }
+        body { font-family: Arial, sans-serif; background: #f4f5f7; margin: 20px; }
+        .board-container { display: flex; gap: 20px; align-items: flex-start; }
+        .column { flex: 1; background: #ebecf0; padding: 15px; border-radius: 6px; min-height: 500px; }
+        .column h3 { margin-top: 0; color: #333; }
+        
+        /* Task Cards Layout Structural Stylings */
+        .task-card { background: #fff; padding: 12px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: border-color 0.2s; }
+        .priority-badge { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 3px; text-transform: uppercase; margin-bottom: 5px; }
+        
+        /* Requirement 1 Styles: Colour Coded Priorities */
+        .priority-low { background: #e2e8f0; color: #4a5568; }
+        .priority-medium { background: #fef3c7; color: #d97706; }
+        .priority-high { background: #fee2e2; color: #dc2626; }
+        
+        /* Requirement 4 Style: Overdue border styling target */
+        .border-red-500 { border-color: #ef4444 !important; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: #666; }
+        .initials-avatar { background: #0052cc; color: #fff; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 10px; }
+        .nav-buttons button { background: #fff; border: 1px solid #ccc; padding: 2px 6px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+        .nav-buttons button:hover { background: #f0f0f0; }
 
-        .board {
-            display: flex;
-            gap: 20px;
-            padding: 10px;
-        }
-
-        .col {
-            width: 33%;
-            background: #f8fafc;
-            padding: 12px;
-            min-height: 400px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        .col h3 {
-            text-align: center;
-            color: #333;
-        }
-
-        .task {
-            background: white;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            transition: 0.2s;
-        }
-
-        .task:hover {
-            transform: scale(1.02);
-        }
-
-        .avatar {
-            display:inline-block;
-            background:#2563eb;
-            color:white;
-            padding:4px 8px;
-            border-radius:50%;
-            font-size:12px;
-            margin-bottom:5px;
-        }
-
-        /* ================= PRIORITY BADGES (FIXED VISIBILITY) ================= */
-        .priority {
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            display: inline-block;
-            margin: 5px 0;
-        }
-
-        .low {
-            background: #10b981;   /* green */
-        }
-
-        .medium {
-            background: #f59e0b;   /* orange */
-        }
-
-        .high {
-            background: #ef4444;   /* red */
-        }
-
-        button {
-            margin: 2px;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            opacity: 0.8;
-        }
+        /* Dialog Modal UI Framework */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: #fff; padding: 20px; border-radius: 6px; width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-primary { background: #0052cc; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+        .error-banner { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
     </style>
 </head>
-
 <body>
 
-<button onclick="openModal()">+ New Task</button>
+    <h2>Project Task Board</h2>
+    
+    <button class="btn-primary" onclick="toggleModal(true)" style="margin-bottom: 20px;">+ New Task</button>
 
-<h2>Kanban Task Board</h2>
-
-<div class="board">
-
-    <!-- TO DO -->
-    <div class="col">
-        <h3>To Do</h3>
-
-        <?php foreach($todo as $t): ?>
-        <div class="task"
-             data-id="<?= $t['id'] ?>"
-             data-due-date="<?= $t['due_date'] ?>"
-             data-status="<?= $t['status'] ?>">
-
-            <div class="avatar">
-                <?= strtoupper(substr($t['name'] ?? 'UN', 0, 2)) ?>
-            </div>
-
-            <strong><?= $t['title'] ?></strong><br>
-
-            <!-- PRIORITY FIXED -->
-            <span class="priority <?= $t['priority'] ?>">
-                <?= strtoupper($t['priority']) ?>
-            </span><br>
-
-            <small><?= $t['due_date'] ?></small><br>
-
-            <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">→</button>
-            <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
+    <?php if (!empty($_SESSION['form_errors'])): ?>
+        <div class="error-banner">
+            <strong>Validation Errors:</strong>
+            <ul>
+                <?php foreach ($_SESSION['form_errors'] as $err): ?>
+                    <li><?= htmlspecialchars($err); ?></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
-        <?php endforeach; ?>
-    </div>
+        <?php unset($_SESSION['form_errors']); ?>
+    <?php endif; ?>
 
-    <!-- IN PROGRESS -->
-    <div class="col">
-        <h3>In Progress</h3>
-
-        <?php foreach($inprogress as $t): ?>
-        <div class="task"
-             data-id="<?= $t['id'] ?>"
-             data-due-date="<?= $t['due_date'] ?>"
-             data-status="<?= $t['status'] ?>">
-
-            <div class="avatar">
-                <?= strtoupper(substr($t['name'] ?? 'UN', 0, 2)) ?>
-            </div>
-
-            <strong><?= $t['title'] ?></strong><br>
-
-            <!-- PRIORITY FIXED -->
-            <span class="priority <?= $t['priority'] ?>">
-                <?= strtoupper($t['priority']) ?>
-            </span><br>
-
-            <small><?= $t['due_date'] ?></small><br>
-
-            <button onclick="moveTask(<?= $t['id'] ?>,'todo')">←</button>
-            <button onclick="moveTask(<?= $t['id'] ?>,'done')">✓</button>
-        </div>
-        <?php endforeach; ?>
-    </div>
-
-    <!-- DONE -->
-    <div class="col">
-        <h3>Done</h3>
-
-        <?php foreach($done as $t): ?>
-        <div class="task"
-             data-id="<?= $t['id'] ?>"
-             data-due-date="<?= $t['due_date'] ?>"
-             data-status="<?= $t['status'] ?>">
-
-            <div class="avatar">
-                <?= strtoupper(substr($t['name'] ?? 'UN', 0, 2)) ?>
-            </div>
-
-            <strong><?= $t['title'] ?></strong><br>
-
-            <!-- PRIORITY FIXED -->
-            <span class="priority <?= $t['priority'] ?>">
-                <?= strtoupper($t['priority']) ?>
-            </span><br>
-
-            <small><?= $t['due_date'] ?></small><br>
-
-            <button onclick="moveTask(<?= $t['id'] ?>,'in-progress')">←</button>
-        </div>
-        <?php endforeach; ?>
-    </div>
-
-</div>
-
-<!-- MODAL -->
-<div id="taskModal" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border-radius:10px; border:1px solid #ccc;">
-
-    <h3>Create Task</h3>
-
-    <form id="taskForm">
-
-        <input type="text" name="title" placeholder="Title" required><br><br>
-
-        <textarea name="description" placeholder="Description"></textarea><br><br>
-
-        <select name="assigned_to" required>
-            <option value="">-- Select Member --</option>
-            <?php foreach($members as $m): ?>
-                <option value="<?= $m['id'] ?>">
-                    <?= htmlspecialchars($m['name']) ?>
-                </option>
+    <div class="board-container">
+        
+        <div class="column" id="todo-column">
+            <h3>To Do</h3>
+            <?php foreach ($todo as $task): ?>
+                <?php 
+                    $words = explode(" ", $task['name'] ?? 'Unassigned');
+                    $initials = strtoupper(substr($words[0][0] ?? '', 0, 1) . substr($words[1][0] ?? '', 0, 1));
+                ?>
+                <div class="task-card" id="task-<?= $task['id']; ?>" data-due-date="<?= $task['due_date']; ?>" data-status="todo">
+                    <span class="priority-badge priority-<?= htmlspecialchars($task['priority']); ?>"><?= htmlspecialchars($task['priority']); ?></span>
+                    <h4 style="margin: 5px 0;"><?= htmlspecialchars($task['title']); ?></h4>
+                    <p style="font-size:13px; color:#555; margin:5px 0;"><?= htmlspecialchars($task['description']); ?></p>
+                    <div class="card-footer">
+                        <span class="initials-avatar" title="<?= htmlspecialchars($task['name']); ?>"><?= $initials; ?></span>
+                        <small>Due: <?= $task['due_date']; ?></small>
+                        <div class="nav-buttons">
+                            <button onclick="shiftTask(<?= $task['id']; ?>, 'in-progress')">→</button>
+                        </div>
+                    </div>
+                </div>
             <?php endforeach; ?>
-        </select>
+        </div>
 
-        <br><br>
+        <div class="column" id="in-progress-column">
+            <h3>In Progress</h3>
+            <?php foreach ($inprogress as $task): ?>
+                <?php 
+                    $words = explode(" ", $task['name'] ?? 'Unassigned');
+                    $initials = strtoupper(substr($words[0][0] ?? '', 0, 1) . substr($words[1][0] ?? '', 0, 1));
+                ?>
+                <div class="task-card" id="task-<?= $task['id']; ?>" data-due-date="<?= $task['due_date']; ?>" data-status="in-progress">
+                    <span class="priority-badge priority-<?= htmlspecialchars($task['priority']); ?>"><?= htmlspecialchars($task['priority']); ?></span>
+                    <h4 style="margin: 5px 0;"><?= htmlspecialchars($task['title']); ?></h4>
+                    <p style="font-size:13px; color:#555; margin:5px 0;"><?= htmlspecialchars($task['description']); ?></p>
+                    <div class="card-footer">
+                        <span class="initials-avatar" title="<?= htmlspecialchars($task['name']); ?>"><?= $initials; ?></span>
+                        <small>Due: <?= $task['due_date']; ?></small>
+                        <div class="nav-buttons">
+                            <button onclick="shiftTask(<?= $task['id']; ?>, 'todo')">←</button>
+                            <button onclick="shiftTask(<?= $task['id']; ?>, 'done')">→</button>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
 
-        <select name="priority">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-        </select>
+        <div class="column" id="done-column">
+            <h3>Done</h3>
+            <?php foreach ($done as $task): ?>
+                <?php 
+                    $words = explode(" ", $task['name'] ?? 'Unassigned');
+                    $initials = strtoupper(substr($words[0][0] ?? '', 0, 1) . substr($words[1][0] ?? '', 0, 1));
+                ?>
+                <div class="task-card" id="task-<?= $task['id']; ?>" data-due-date="<?= $task['due_date']; ?>" data-status="done">
+                    <span class="priority-badge priority-<?= htmlspecialchars($task['priority']); ?>"><?= htmlspecialchars($task['priority']); ?></span>
+                    <h4 style="margin: 5px 0;"><?= htmlspecialchars($task['title']); ?></h4>
+                    <p style="font-size:13px; color:#555; margin:5px 0;"><?= htmlspecialchars($task['description']); ?></p>
+                    <div class="card-footer">
+                        <span class="initials-avatar" title="<?= htmlspecialchars($task['name']); ?>"><?= $initials; ?></span>
+                        <small>Due: <?= $task['due_date']; ?></small>
+                        <div class="nav-buttons">
+                            <button onclick="shiftTask(<?= $task['id']; ?>, 'in-progress')">←</button>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
 
-        <br><br>
+    </div>
 
-        <input type="date" name="due_date" required><br><br>
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h3>Create New Task</h3>
+            <form action="/index.php?action=create" method="POST">
+                <div class="form-group">
+                    <label>Task Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Assign Member *</label>
+                    <select name="assigned_to" required>
+                        <option value="">-- Choose Member --</option>
+                        <?php foreach ($members as $m): ?>
+                            <option value="<?= $m['id']; ?>"><?= htmlspecialchars($m['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <div style="display:flex; gap:15px; padding-top:5px;">
+                        <label style="font-weight:normal;"><input type="radio" name="priority" value="low" checked> Low</label>
+                        <label style="font-weight:normal;"><input type="radio" name="priority" value="medium"> Medium</label>
+                        <label style="font-weight:normal;"><input type="radio" name="priority" value="high"> High</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Due Date *</label>
+                    <input type="date" name="due_date" required>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" onclick="toggleModal(false)" style="padding: 10px 15px; margin-right: 10px; border:none; border-radius:4px; cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <button type="submit">Create</button>
-        <button type="button" onclick="closeModal()">Close</button>
+    <script>
+        // Toggle view display state of inline form entry wrapper modal
+        function toggleModal(show) {
+            document.getElementById('taskModal').style.display = show ? 'flex' : 'none';
+        }
 
-    </form>
-</div>
+        // Requirement 4 Engine: Overdue Highlighting Controller Integration
+        document.addEventListener("DOMContentLoaded", function() {
+            // Drop hour offsets to guarantee precise baseline day boundaries calculations
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-<!-- JS (UNCHANGED LOGIC) -->
-<script>
-function openModal() {
-    document.getElementById("taskModal").style.display = "block";
-}
+            document.querySelectorAll(".task-card").forEach(card => {
+                const status = card.getAttribute("data-status");
+                const dateAttr = card.getAttribute("data-due-date");
 
-function closeModal() {
-    document.getElementById("taskModal").style.display = "none";
-}
-</script>
+                if (!dateAttr || status === 'done') return;
 
-<script>
-async function moveTask(task_id, status) {
+                const dueDate = new Date(dateAttr);
+                dueDate.setHours(0, 0, 0, 0);
 
-    let res = await fetch("api/task_board/update_status.php", {
-        method: "PUT",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ task_id, status })
-    });
+                // Apply critical class flagging if past schedule parameters
+                if (dueDate < today) {
+                    card.classList.add("border-red-500");
+                }
+            });
+        });
 
-    let data = await res.json();
+        // Requirement 3 Logic: Intercept clicks and execute programmatic PUT transitions 
+        function shiftTask(taskId, targetStatus) {
+            fetch('/api/task_board/status.php', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    task_id: taskId,
+                    status: targetStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    // Relocate components safely across view trees using appendChild logic
+                    const cardElement = document.getElementById('task-' + taskId);
+                    const targetColumn = document.getElementById(data.new_status + '-column');
+                    
+                    if (cardElement && targetColumn) {
+                        // Dynamically updates status tracker tags so validation boundaries calculate cleanly
+                        cardElement.setAttribute('data-status', data.new_status);
+                        
+                        // Re-render button actions dynamically so inline arrows correspond with current positioning adjustments
+                        const navContainer = cardElement.querySelector('.nav-buttons');
+                        if (data.new_status === 'todo') {
+                            navContainer.innerHTML = `<button onclick="shiftTask(${taskId}, 'in-progress')">→</button>`;
+                        } else if (data.new_status === 'in-progress') {
+                            navContainer.innerHTML = `
+                                <button onclick="shiftTask(${taskId}, 'todo')">←</button>
+                                <button onclick="shiftTask(${taskId}, 'done')">→</button>
+                            `;
+                        } else if (data.new_status === 'done') {
+                            navContainer.innerHTML = `<button onclick="shiftTask(${taskId}, 'in-progress')">←</button>`;
+                        }
 
-    if (data.ok) {
-        location.reload();
-    } else {
-        alert("Move failed");
-    }
-}
-</script>
-
-<script>
-document.querySelectorAll(".task").forEach(task => {
-
-    let dueDate = new Date(task.dataset.dueDate);
-    let today = new Date();
-    today.setHours(0,0,0,0);
-
-    if (dueDate < today && task.dataset.status !== "done") {
-        task.style.border = "2px solid red";
-    }
-});
-</script>
-
-<script>
-document.getElementById("taskForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    let formData = new FormData(this);
-    let data = Object.fromEntries(formData);
-
-    let res = await fetch("api/task_board/create.php", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(data)
-    });
-
-    let result = await res.json();
-
-    if (result.success) {
-        alert("Task Created");
-        location.reload();
-    } else {
-        alert("Failed");
-    }
-});
-</script>
-
+                        // Append DOM node to container instantly
+                        targetColumn.appendChild(cardElement);
+                        
+                        // Recalculate overdue highlighting on modified card
+                        const today = new Date().setHours(0,0,0,0);
+                        const dueDate = new Date(cardElement.getAttribute("data-due-date")).setHours(0,0,0,0);
+                        if (data.new_status === 'done') {
+                            cardElement.classList.remove("border-red-500");
+                        } else if (dueDate < today) {
+                            cardElement.classList.add("border-red-500");
+                        }
+                    }
+                } else {
+                    alert("Illegal transition move rejected: " + (data.message || "Unknown error"));
+                }
+            })
+            .catch(error => {
+                console.error("AJAX Error payload mismatch failure execution trace:", error);
+                alert("Network communication failure.");
+            });
+        }
+    </script>
 </body>
 </html>

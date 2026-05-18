@@ -190,6 +190,11 @@ class ProjectController {
 	public function archive($id) {
 		$workspace_id = $this->workspaceId();
 
+		if (!$id) {
+			echo "Project ID is missing.";
+			return;
+		}
+
 		$project = $this->projectModel->findProject($id, $workspace_id);
 
 		if (!$project) {

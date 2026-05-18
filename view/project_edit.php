@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Project Settings</title>
-	<link rel="stylesheet" href="view/style.css?v=3">
+	<link rel="stylesheet" href="view/style.css?v=10">
 </head>
 <body>
 
@@ -15,7 +15,9 @@
 	<div class="page-header">
 		<h1>Project Settings</h1>
 
-		<form method="POST" action="/Group%208/Task_And_Project_Management_Tool_Webtech_Project/api/projects/<?= e($project['id']) ?>/archive">
+		<form method="POST" action="index.php?page=archive_project">
+			<input type="hidden" name="id" value="<?= e($project['id']) ?>">
+
 			<button type="submit" class="archive-btn">
 				Archive Project
 			</button>
@@ -44,7 +46,12 @@
 		<div class="color-options">
 			<?php foreach ($colors as $color): ?>
 				<label class="swatch-option <?= (($_POST['color_label'] ?? $project['color_label']) === $color) ? 'selected' : '' ?>">
-					<input type="radio" name="color_label" value="<?= e($color) ?>" <?= (($_POST['color_label'] ?? $project['color_label']) === $color) ? 'checked' : '' ?>>
+					<input
+						type="radio"
+						name="color_label"
+						value="<?= e($color) ?>"
+						<?= (($_POST['color_label'] ?? $project['color_label']) === $color) ? 'checked' : '' ?>
+					>
 					<span class="color-dot" style="background: <?= e($color) ?>"></span>
 				</label>
 			<?php endforeach; ?>

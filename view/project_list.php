@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Projects</title>
-	<link rel="stylesheet" href="view/style.css">
+	<link rel="stylesheet" href="view/style.css?v=3">
 </head>
 <body>
 
@@ -36,7 +36,21 @@
 					<p class="<?= strtotime($project['deadline']) < strtotime(date('Y-m-d')) ? 'text-red' : '' ?>">
 						Deadline: <?= e($project['deadline']) ?>
 					</p>
+				<?php else: ?>
+					<p class="muted">No deadline</p>
 				<?php endif; ?>
+
+				<div class="avatars">
+					<?php if (empty($project['members'])): ?>
+						<span class="muted">No members</span>
+					<?php else: ?>
+						<?php foreach ($project['members'] as $member): ?>
+							<span class="avatar" title="<?= e($member['name']) ?>">
+								<?= e(initials($member['name'])) ?>
+							</span>
+						<?php endforeach; ?>
+					<?php endif; ?>
+				</div>
 
 				<?php if ($project['progress_percent'] === null): ?>
 					<p>No tasks yet</p>

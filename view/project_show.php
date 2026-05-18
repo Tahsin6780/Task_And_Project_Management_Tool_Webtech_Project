@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Project Details</title>
-	<link rel="stylesheet" href="view/style.css?v=3">
+	<link rel="stylesheet" href="view/style.css?v=10">
 </head>
 <body>
 
@@ -13,7 +13,11 @@
 
 <div class="container">
 	<div class="page-header">
-		<h1><?= e($project['name']) ?></h1>
+		<div>
+			<p class="project-id">Project ID: <?= e($project['id']) ?></p>
+			<h1><?= e($project['name']) ?></h1>
+		</div>
+
 		<a class="btn" href="index.php?page=edit_project&id=<?= e($project['id']) ?>">Project Settings</a>
 	</div>
 

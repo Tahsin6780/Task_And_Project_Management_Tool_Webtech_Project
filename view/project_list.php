@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Projects</title>
-	<link rel="stylesheet" href="view/style.css?v=3">
+	<link rel="stylesheet" href="view/style.css?v=10">
 </head>
 <body>
 
@@ -28,6 +28,8 @@
 	<div class="project-grid" id="project-grid">
 		<?php foreach ($projects as $project): ?>
 			<div class="card project-card" id="project-card-<?= e($project['id']) ?>" style="border-left-color: <?= e($project['color_label']) ?>">
+				<p class="project-id">Project ID: <?= e($project['id']) ?></p>
+
 				<h2><?= e($project['name']) ?></h2>
 
 				<p><?= e($project['description']) ?></p>

@@ -13,7 +13,10 @@
 
 <div class="container">
 	<div class="page-header">
-		<h1>Project Settings</h1>
+		<div>
+			<p class="project-id">Project ID: <?= e($project['id']) ?></p>
+			<h1>Project Settings</h1>
+		</div>
 
 		<form method="POST" action="index.php?page=archive_project">
 			<input type="hidden" name="id" value="<?= e($project['id']) ?>">

@@ -503,3 +503,15 @@ textarea {
 		padding: 20px;
 	}
 }
+
+.project-id {
+	display: inline-block;
+	background: #EEF2FF;
+	color: #3730A3;
+	border: 1px solid #C7D2FE;
+	border-radius: 999px;
+	padding: 5px 10px;
+	font-size: 13px;
+	font-weight: 800;
+	margin: 0 0 10px;
+}

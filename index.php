@@ -25,10 +25,6 @@ function initials($name) {
 /*
 	Temporary testing session.
 	Remove this after Member 1 auth/workspace module is merged.
-	Member 1 should set:
-	$_SESSION['user_id']
-	$_SESSION['name']
-	$_SESSION['workspace_id']
 */
 if (empty($_SESSION['user_id'])) {
 	$_SESSION['user_id'] = 1;
@@ -40,6 +36,14 @@ $database = new Database();
 $pdo = $database->connect();
 
 $controller = new ProjectController($pdo);
+
+$request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$request_method = $_SERVER['REQUEST_METHOD'];
+
+if ($request_method === 'POST' && preg_match('#/api/projects/([0-9]+)/archive$#', $request_uri, $matches)) {
+	$controller->archive($matches[1]);
+	exit;
+}
 
 $page = $_GET['page'] ?? 'projects';
 
@@ -55,8 +59,8 @@ if ($page === 'projects') {
 	$controller->edit($_GET['id'] ?? null);
 } elseif ($page === 'update_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 	$controller->update();
-} elseif ($page === 'archive_project') {
-	$controller->archive($_GET['id'] ?? null);
+} elseif ($page === 'archive_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+	$controller->archive($_POST['id'] ?? null);
 } elseif ($page === 'ajax_archive_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 	$controller->archiveAjax($_POST['id'] ?? null);
 } elseif ($page === 'ajax_unarchive_project' && $_SERVER['REQUEST_METHOD'] === 'POST') {

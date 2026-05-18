@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Edit Project</title>
-	<link rel="stylesheet" href="view/style.css">
+	<title>Project Settings</title>
+	<link rel="stylesheet" href="view/style.css?v=3">
 </head>
 <body>
 
@@ -12,7 +12,15 @@
 </div>
 
 <div class="container">
-	<h1>Edit Project</h1>
+	<div class="page-header">
+		<h1>Project Settings</h1>
+
+		<form method="POST" action="/Group%208/Task_And_Project_Management_Tool_Webtech_Project/api/projects/<?= e($project['id']) ?>/archive">
+			<button type="submit" class="archive-btn">
+				Archive Project
+			</button>
+		</form>
+	</div>
 
 	<form method="POST" action="index.php?page=update_project" class="card form project-form">
 		<input type="hidden" name="project_id" value="<?= e($project['id']) ?>">
@@ -32,17 +40,17 @@
 			<small class="error"><?= e($errors['deadline']) ?></small>
 		<?php endif; ?>
 
-		<label>Color</label>
+		<label>Colour Label</label>
 		<div class="color-options">
 			<?php foreach ($colors as $color): ?>
-				<label>
+				<label class="swatch-option <?= (($_POST['color_label'] ?? $project['color_label']) === $color) ? 'selected' : '' ?>">
 					<input type="radio" name="color_label" value="<?= e($color) ?>" <?= (($_POST['color_label'] ?? $project['color_label']) === $color) ? 'checked' : '' ?>>
 					<span class="color-dot" style="background: <?= e($color) ?>"></span>
 				</label>
 			<?php endforeach; ?>
 		</div>
 
-		<label>Members</label>
+		<label>Project Members</label>
 
 		<?php if (empty($members)): ?>
 			<p class="error">No workspace members found.</p>
@@ -64,7 +72,7 @@
 			<small class="error"><?= e($errors['member_ids']) ?></small>
 		<?php endif; ?>
 
-		<button type="submit" class="btn">Save Changes</button>
+		<button type="submit" class="btn">Save Settings</button>
 	</form>
 </div>
 
